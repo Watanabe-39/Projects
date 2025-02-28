@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asteroids - NeoWs</title>
+</head>
+<body>
+    <div class="navbar">
+        <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
+        <div class="menu" id="menu">
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/asteroids">Asteroids</a></li>
+            </ul>
+        </div>
+    </div>
+    <h1>Asteroids - NeoWs</h1>
+    <form onsubmit="event.preventDefault(); fetchAsteroids();">
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date">
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date">
+        <button type="submit">Get Asteroids</button>
+    </form>
+    <h2>Asteroids Information</h2>
+    <div id="asteroids_info"></div>
+
+</body>
+</html>
+
+<style>
+    /* 全体のスタイル */
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        color: #333;
+        text-align: center;
+    }
+
+    /* ヘッダーのスタイル */
+    h1 {
+        background-color: #333;
+        color: #fff;
+        padding: 20px 0;
+        margin: 0;
+    }
+
+    /* ナビゲーションバーのスタイル */
+    .navbar {
+        position: relative;
+        width: 100%;
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        text-align: left;
+    }
+
+    .hamburger {
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    .menu {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 40px;
+        left: 10px;
+        background-color: #333;
+        border: 1px solid #fff;
+        padding: 10px;
+        opacity: 0;
+        transition: opacity 0.5s ease, max-height 0.5s ease;
+        max-height: 0;
+        overflow: hidden;
+    }
+
+    .menu.show {
+        display: flex;
+        opacity: 1;
+        max-height: 200px; /* メニューの高さに応じて調整 */
+    }
+
+    .menu a {
+        color: #fff;
+        text-decoration: none;
+        padding: 5px 0;
+    }
+
+    .menu a:hover {
+        background-color: #555;
+    }
+
+    .menu ul {
+        padding-left: 0;
+    }
+
+    .menu li {
+        list-style: none;
+        padding: 3px;
+    }
+
+    /* フォームのスタイル */
+    form {
+        margin: 20px 0;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    input[type="date"] {
+        padding: 5px;
+        margin-right: 10px;
+    }
+
+    button {
+        padding: 5px 10px;
+        background-color: #333;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #555;
+    }
+
+    /* 小惑星情報のスタイル */
+    #asteroids_info {
+        margin: 20px;
+        text-align: left;
+    }
+
+    #asteroids_info h3 {
+        color: #007BFF;
+    }
+
+    #asteroids_info ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    #asteroids_info li {
+        background-color: #e9e9e9;
+        margin: 5px 0;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    function toggleMenu() {
+        var menu = document.getElementById('menu');
+        menu.classList.toggle('show');
+    }
+
+    async function fetchAsteroids() {
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        const response = await fetch('/get_asteroids', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `start_date=${startDate}&end_date=${endDate}`
+        });
+        const data = await response.json();
+        displayAsteroids(data);
+    }
+
+    function displayAsteroids(data) {
+        const container = document.getElementById('asteroids_info');
+        container.innerHTML = '';
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        for (const date in data.near_earth_objects) {
+            const dateHeader = document.createElement('h3');
+            dateHeader.textContent = date;
+            container.appendChild(dateHeader);
+            const ul = document.createElement('ul');
+            data.near_earth_objects[date].forEach(asteroid => {
+                const li = document.createElement('li');
+                li.textContent = `${asteroid.name} - Diameter: ${asteroid.estimated_diameter.kilometers.estimated_diameter_max} km`;
+                li.dataset.asteroidId = asteroid.id;
+                li.dataset.date = date;
+                const button = document.createElement('button');
+                button.textContent = 'Show Orbit';
+                button.addEventListener('click', () => {
+                    showOrbit(asteroid.name, startDate, endDate)
+                    console.log(asteroid.id);
+                });
+                li.appendChild(button);
+                ul.appendChild(li);
+            });
+            container.appendChild(ul);
+        }
+    }
+
+    async function showOrbit(asteroidId, start_date, stop_date) {
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        const response = await fetch('/show_orbit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `asteroid_id=${asteroidId}&start_date=${startDate}&end_date=${endDate}`
+        });
+        const data = await response.json();
+        // 軌道データを表示するための処理をここに追加
+        console.log(data);
+    }
+</script>

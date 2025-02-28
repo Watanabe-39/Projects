@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA APOD</title>
+    <link rel="stylesheet" href="../static/home.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
+        <div class="menu" id="menu">
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/asteroids">Asteroids</a></li>
+            </ul>
+        </div>
+    </div>
+    <h1>NASA Astronomy Picture of the Day</h1>
+    <form method="post">
+        <label for="date">Select a date:</label>
+        <input type="date" id="date" name="date" value="{{ apod_data.date }}">
+        <button type="submit">Get Image</button>
+    </form>
+    <h2>{{ apod_data.title }}</h2>
+    <p>{{ apod_data.date }}</p>
+    <div id="apod_image">
+        <img src="{{ apod_data.url }}" alt="{{ apod_data.title }}" style="max-width: 80%;">
+        <p>{{ apod_data.explanation }}</p>    
+    </div>
+    
+    <!-- <form action="/asteroids" method="get">
+        <button type="submit">Go to Asteroids Page</button>
+    </form> -->
+
+    <script>
+        function toggleMenu() {
+            var menu = document.getElementById('menu');
+            menu.classList.toggle('show');
+        }
+    </script>
+</body>
+</html>
